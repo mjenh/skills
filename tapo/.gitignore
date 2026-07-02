@@ -1,0 +1,17 @@
+# Environment and secrets
+.env
+.env.local
+
+# Go build artifacts
+/tapo
+/bin/
+*.exe
+*.test
+*.out
+coverage.out
+coverage.html
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store

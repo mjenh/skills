@@ -1,0 +1,44 @@
+{
+  "name": "tapo_plug",
+  "description": "Control a Tapo P100 smart plug on the local network.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string",
+        "enum": ["on", "off", "toggle", "info"],
+        "description": "Power action to perform or info to read device state."
+      }
+    },
+    "required": ["action"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "action": {
+        "type": "string"
+      },
+      "message": {
+        "type": "string"
+      },
+      "warning": {
+        "type": "string"
+      },
+      "device": {
+        "type": "object",
+        "properties": {
+          "deviceOn": { "type": "boolean" },
+          "model": { "type": "string" },
+          "nickname": { "type": "string" },
+          "deviceId": { "type": "string" },
+          "firmwareVersion": { "type": "string" },
+          "hardwareVersion": { "type": "string" },
+          "ipAddress": { "type": "string" },
+          "mac": { "type": "string" },
+          "ssid": { "type": "string" }
+        }
+      }
+    },
+    "required": ["action", "message"]
+  }
+}
