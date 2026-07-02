@@ -1,12 +1,6 @@
 .agent
 .agents
 .claude
-# Ignore .github except workflows and release scripts
-.github/*
-!.github/workflows/
-!.github/workflows/**
-!.github/scripts/
-!.github/scripts/**
 # Ignore BMAD install tree; keep team customizations
 _bmad/*
 !_bmad/custom/
