@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tapo — Architecture Discussion</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.9.1/mermaid.min.js"></script>
+<style>
+  :root {
+    --bg: #fafafa; --fg: #1a1a2e; --accent: #4361ee; --accent2: #3a0ca3;
+    --card-bg: #fff; --border: #e0e0e0; --code-bg: #f4f4f8; --muted: #666;
+    --green: #2d6a4f; --amber: #b45309; --red: #9b2226;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f1a; --fg: #e0e0e0; --accent: #7b8cff; --accent2: #a78bfa;
+      --card-bg: #1a1a2e; --border: #2a2a3e; --code-bg: #1e1e30; --muted: #999;
+      --green: #52b788; --amber: #fbbf24; --red: #ef4444;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--fg); line-height: 1.6; max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem; }
+  h1 { font-size: 1.8rem; margin-bottom: 0.3rem; color: var(--accent2); }
+  h2 { font-size: 1.3rem; margin: 2.5rem 0 1rem; color: var(--accent); border-bottom: 2px solid var(--accent); padding-bottom: 0.3rem; }
+  h3 { font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+  p { margin-bottom: 1rem; }
+  .subtitle { color: var(--muted); font-size: 0.95rem; margin-bottom: 2rem; }
+  .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.5rem; margin-bottom: 1.2rem; }
+  .card h3 { margin-top: 0; }
+  .decision-id { display: inline-block; background: var(--accent); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; margin-right: 0.5rem; }
+  .tag { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 2px 6px; border-radius: 3px; margin-left: 0.4rem; }
+  .tag-adopted { background: var(--green); color: #fff; }
+  .tag-new { background: var(--amber); color: #fff; }
+  .tag-amended { background: var(--red); color: #fff; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: var(--code-bg); padding: 1rem; border-radius: 6px; overflow-x: auto; margin: 1rem 0; font-size: 0.85rem; }
+  pre code { background: none; padding: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+  th, td { padding: 0.5rem 0.75rem; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--code-bg); font-weight: 600; }
+  .mermaid { margin: 1.5rem 0; text-align: center; }
+  .alternatives { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 1rem 0; }
+  .alt { background: var(--code-bg); border-radius: 6px; padding: 0.8rem 1rem; font-size: 0.9rem; }
+  .alt.chosen { border: 2px solid var(--green); }
+  .alt.rejected { opacity: 0.6; }
+  .alt-label { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; margin-bottom: 0.3rem; }
+  .alt.chosen .alt-label { color: var(--green); }
+  .alt.rejected .alt-label { color: var(--muted); }
+  .question { background: var(--code-bg); border-left: 4px solid var(--amber); padding: 0.8rem 1rem; margin: 1rem 0; border-radius: 0 6px 6px 0; font-size: 0.9rem; }
+  @media (max-width: 600px) { .alternatives { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<h1>tapo — Architecture Discussion</h1>
+<p class="subtitle">Go client library for Tapo P100 smart plug control over LAN &bull; v1 architecture walkthrough &bull; July 2026</p>
+
+<h2>The Problem</h2>
+<p>Go developers building home or small-office automation need to control Tapo smart plugs locally. The existing Go library (rk295/tapo-go) is stale and lacks support for the KLAP protocol used by current firmware. Cloud control adds latency and privacy concerns. <strong>tapo</strong> fills this gap as a focused, zero-dependency, MIT-licensed module for P100 plugs.</p>
+
+<h2>System Overview</h2>
+
+<div class="mermaid">
+graph TD
+    Consumer["Consumer code<br/><em>go get github.com/mjenh/tapo</em>"] --> Root["tapo (root package)<br/>Plug &bull; DeviceInfo &bull; Options &bull; Sentinels"]
+    Root -->|"one Transport reference"| NT["NegotiatingTransport<br/><em>internal/transport</em>"]
+    NT -->|"tries first"| KLAP["KLAP Transport<br/><em>internal/transport/klap</em>"]
+    NT -->|"fallback"| Legacy["Legacy Transport<br/><em>internal/transport/legacy</em>"]
+    KLAP --> Crypto["Shared crypto helpers<br/><em>internal/crypto</em>"]
+    Legacy --> Crypto
+
+    style Root fill:#4361ee,color:#fff
+    style NT fill:#3a0ca3,color:#fff
+    style KLAP fill:#2d6a4f,color:#fff
+    style Legacy fill:#b45309,color:#fff
+    style Crypto fill:#666,color:#fff
+</style>
+</div>
+
+<h2>Key Design Decisions</h2>
+
+<div class="card">
+  <h3><span class="decision-id">AD-1</span> Layered with <code>internal/</code> boundary</h3>
+  <p>All transport and crypto code is hidden behind Go's <code>internal/</code> visibility fence. Consumers see only the root package: <code>Plug</code>, <code>DeviceInfo</code>, <code>Option</code>, and error sentinels. This means we can refactor protocol internals freely without breaking the public API.</p>
+  <div class="alternatives">
+    <div class="alt chosen"><div class="alt-label">Chosen</div>Layered + internal/ — clean public surface, internal testability via Transport interface</div>
+    <div class="alt rejected"><div class="alt-label">Rejected</div>Flat root package — simple but leaks transport details into go doc</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3><span class="decision-id">AD-3</span> Thin Transport interface</h3>
+  <p>The internal <code>Transport</code> interface has just two methods:</p>
+  <pre><code>type Transport interface {
+    Login(ctx context.Context, email, password string) error
+    Send(ctx context.Context, method string, payload json.RawMessage) (json.RawMessage, error)
+}</code></pre>
+  <p><code>Plug</code> builds the command JSON (e.g. <code>{"method":"set_device_info","params":{"device_on":true}}</code>), hands it to <code>Send</code>, and gets decrypted JSON back. The command vocabulary lives in one place — the root package — not duplicated across two transport implementations.</p>
+  <div class="alternatives">
+    <div class="alt chosen"><div class="alt-label">Chosen</div>Thin Send/Login — transport handles encryption only; interface never grows</div>
+    <div class="alt rejected"><div class="alt-label">Rejected</div>Command-level methods — GetDeviceInfo(), SetDeviceInfo() etc. duplicated in each transport</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3><span class="decision-id">AD-7</span> Lazy negotiation via composite transport <span class="tag tag-amended">amended</span></h3>
+  <p><code>NewPlug</code> returns immediately — no network I/O. A <code>NegotiatingTransport</code> inside <code>internal/transport</code> implements the <code>Transport</code> interface and owns the protocol-selection logic: on the first <code>Login</code> call, it tries KLAP; on protocol failure, retries legacy; caches the winner for all subsequent calls.</p>
+  <p><code>Plug</code> holds one <code>Transport</code> reference and never knows about KLAP or legacy directly. The <code>WithTransport</code> option bypasses negotiation by injecting a concrete transport.</p>
+  <p><strong>Why amended:</strong> The adversarial reviewer found that without specifying who owns the negotiation loop, two implementers could build incompatible module structures. Placing it in a composite transport keeps Plug simple and the boundary clean.</p>
+</div>
+
+<div class="card">
+  <h3><span class="decision-id">AD-5</span> Mutex-based concurrency</h3>
+  <p>Two mutex layers for goroutine safety:</p>
+  <p><strong>Layer 1 (transport):</strong> Each transport impl guards its session state (cookies, keys, counters) with <code>sync.Mutex</code>.</p>
+  <p><strong>Layer 2 (Plug):</strong> A separate mutex gates re-authentication. When concurrent goroutines hit session expiry, one re-auths while others block, then all retry with the fresh session.</p>
+  <div class="alternatives">
+    <div class="alt chosen"><div class="alt-label">Chosen</div>sync.Mutex — zero deps, sufficient for single-host client</div>
+    <div class="alt rejected"><div class="alt-label">Rejected</div>singleflight.Group — needs golang.org/x/sync; result-sharing not useful here (side-effect, not cache)</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3><span class="decision-id">AD-6</span> Sentinel errors</h3>
+  <p>Four sentinels cover the spec's required error categories:</p>
+  <table>
+    <tr><th>Sentinel</th><th>When</th></tr>
+    <tr><td><code>ErrAuth</code></td><td>Invalid credentials or login rejected</td></tr>
+    <tr><td><code>ErrTimeout</code></td><td>Context deadline or 10s default exceeded</td></tr>
+    <tr><td><code>ErrUnsupportedModel</code></td><td>Device is not P100 (warning, not failure)</td></tr>
+    <tr><td><code>ErrHandshake</code></td><td>Protocol handshake failed (both KLAP and legacy)</td></tr>
+  </table>
+  <p>All wrapped via <code>fmt.Errorf("...: %w", sentinel)</code>. Callers use <code>errors.Is</code>. Typed error structs deferred to a minor version if structured fields are needed.</p>
+</div>
+
+<h2>Directory Layout</h2>
+
+<pre><code>github.com/mjenh/tapo/
+  plug.go              # Plug type, NewPlug, NewPlugFromEnv, TurnOn/Off/Toggle/DeviceInfo
+  device_info.go       # DeviceInfo struct, base64 decoding, JSON mapping
+  options.go           # Option type, WithTimeout, WithRetry, WithTransport
+  errors.go            # Sentinel errors
+  doc.go               # Package doc comment
+  internal/
+    transport/
+      transport.go     # Transport interface definition
+      negotiate.go     # NegotiatingTransport composite
+      klap/
+        klap.go        # KLAP implementation (seed handshake, AES, sequence counter)
+      legacy/
+        legacy.go      # Legacy implementation (RSA handshake, securePassthrough)
+    crypto/
+      crypto.go        # AES encrypt/decrypt, key/IV derivation
+      auth.go          # Auth hash helpers (MD5 for KLAP, SHA1+base64 for legacy)</code></pre>
+
+<h2>Stack</h2>
+
+<table>
+  <tr><th>Component</th><th>Version</th><th>Notes</th></tr>
+  <tr><td>Go</td><td>1.24+ min / 1.26.4 stable</td><td>1.22 EOL; 1.24 enforces RSA-1024 minimum</td></tr>
+  <tr><td>crypto/aes, crypto/cipher</td><td>stdlib</td><td>AES-CBC not deprecated (only OFB/CFB)</td></tr>
+  <tr><td>crypto/rsa</td><td>stdlib</td><td>Legacy protocol; RSA-1024 at Go's floor</td></tr>
+  <tr><td>crypto/md5, crypto/sha1</td><td>stdlib</td><td>Protocol-mandated, not security choices</td></tr>
+  <tr><td>net/http</td><td>stdlib</td><td>One client per transport instance</td></tr>
+  <tr><td>External deps</td><td colspan="2"><strong>None</strong></td></tr>
+</table>
+
+<h2>Capability → Architecture Map</h2>
+
+<table>
+  <tr><th>Capability</th><th>Lives in</th><th>Governed by</th></tr>
+  <tr><td>CAP-1: Construct client</td><td>plug.go, options.go</td><td>AD-1, AD-7</td></tr>
+  <tr><td>CAP-2: Authenticate</td><td>internal/transport/*</td><td>AD-3, AD-4, AD-5</td></tr>
+  <tr><td>CAP-3: Env construction</td><td>plug.go</td><td>AD-1</td></tr>
+  <tr><td>CAP-4–6: On/Off/Toggle</td><td>plug.go → Transport.Send</td><td>AD-3, AD-6</td></tr>
+  <tr><td>CAP-7: DeviceInfo</td><td>plug.go, device_info.go</td><td>AD-3, AD-8</td></tr>
+  <tr><td>CAP-8: Model warning</td><td>plug.go, errors.go</td><td>AD-6</td></tr>
+  <tr><td>CAP-9: Transport negotiation</td><td>internal/transport/negotiate.go</td><td>AD-2, AD-7</td></tr>
+  <tr><td>CAP-10: Goroutine safety</td><td>plug.go + transport mutexes</td><td>AD-5</td></tr>
+</table>
+
+<h2>Deferred Decisions</h2>
+
+<div class="question"><strong>Per-command retry policy</strong> — Retry at Plug level or Transport level? Deferred until real-world usage reveals the right layer.</div>
+<div class="question"><strong>Structured logging</strong> — stdlib <code>log/slog</code> vs callback? A <code>debug bool</code> flag is sufficient for v1.</div>
+<div class="question"><strong>RSA-1024 key size</strong> — Tapo legacy uses RSA-1024, exactly at Go 1.24's floor. Monitor across Go releases.</div>
+<div class="question"><strong>Constant-time credential comparison</strong> — Revisit on security review.</div>
+
+<h2>What's Next</h2>
+<p>With the spec and architecture spine in place, the natural next steps are:</p>
+<p><strong>1. Adopt the spine as a spec companion</strong> — run <code>bmad-spec</code> to register <code>tapo-architecture.md</code> in the spec's companions list, keeping AD IDs citable downstream.</p>
+<p><strong>2. Create epics and stories</strong> — run <code>bmad-create-epics-and-stories</code> to break the 10 capabilities into implementable units, governed by the ADs above.</p>
+
+<script>mermaid.initialize({startOnLoad:true, theme:'neutral'});</script>
+</body>
+</html>
