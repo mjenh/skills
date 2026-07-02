@@ -1,0 +1,10 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+case_file_subdir = "investigations"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Case files: {implementation_artifacts}/{slug}/investigations/{ticket-slug}-investigation.md. Resolve product slug first.",
+]

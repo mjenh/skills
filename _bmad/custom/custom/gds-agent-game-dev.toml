@@ -1,0 +1,8 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[agent]
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Every workflow this agent dispatches must use slug folders: planning under {planning_artifacts}/{slug}/, implementation under {implementation_artifacts}/{slug}/.",
+]

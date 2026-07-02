@@ -1,0 +1,8 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Write epics to {planning_artifacts}/{slug}/{slug}-epics.md; read GDD at {planning_artifacts}/{slug}/{slug}-gdd.md.",
+]

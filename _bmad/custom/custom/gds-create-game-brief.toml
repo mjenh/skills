@@ -1,0 +1,11 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+brief_output_path = "{planning_artifacts}"
+run_folder_pattern = "{slug}"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Write {slug}-brief.md in {planning_artifacts}/{slug}/ as the primary deliverable.",
+]

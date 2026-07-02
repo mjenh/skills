@@ -1,0 +1,15 @@
+.agent
+.agents
+.claude
+# Ignore .github except workflows
+.github/*
+!.github/workflows/
+# Ignore BMAD install tree; keep team customizations
+_bmad/*
+!_bmad/custom/
+!_bmad/custom/**
+!_bmad-output
+.DS_Store
+.env
+!.env*example
+*-key.json

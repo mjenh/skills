@@ -1,0 +1,9 @@
+# Team / enterprise overrides for _bmad/config.toml.
+# Committed to the repo — applies to every developer on the project.
+#
+# Artifact layout: all planning and implementation docs use slug folders.
+# See _bmad/custom/artifact-layout.md for paths, naming, and slug resolution.
+
+[core]
+# Repo-level name only; per-product slug comes from PRD/GDD title at runtime.
+# Workflows read artifact-layout.md for folder conventions.

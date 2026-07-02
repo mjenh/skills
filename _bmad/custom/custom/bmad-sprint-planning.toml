@@ -1,0 +1,8 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Override paths: status_file = {planning_artifacts}/{slug}/sprint-status.yaml; epics_location = {planning_artifacts}/{slug}/; story_location = {implementation_artifacts}/{slug}/. Resolve slug before generating sprint-status.yaml.",
+]

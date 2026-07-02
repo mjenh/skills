@@ -1,0 +1,11 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+ux_output_path = "{planning_artifacts}"
+run_folder_pattern = "{slug}"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Bind doc_workspace to {planning_artifacts}/{slug}/; keep DESIGN.md and EXPERIENCE.md there.",
+]

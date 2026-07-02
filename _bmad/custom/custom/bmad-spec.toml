@@ -1,0 +1,12 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+spec_output_path = "{planning_artifacts}"
+run_folder_pattern = "{slug}"
+spec_filename = "{slug}-spec.md"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Place specs under {planning_artifacts}/{slug}/ with filename {slug}-spec.md.",
+]

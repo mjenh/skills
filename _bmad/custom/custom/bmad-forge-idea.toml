@@ -1,0 +1,11 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+forge_output_path = "{planning_artifacts}"
+run_folder_pattern = "{slug}"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Forge sessions live under {planning_artifacts}/{slug}/; derive slug from the idea title.",
+]

@@ -1,0 +1,11 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+prd_output_path = "{planning_artifacts}"
+run_folder_pattern = "{slug}"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Derive {slug} from the PRD title during Discovery; create {planning_artifacts}/{slug}/ and write {slug}-prd.md as the primary deliverable (not prd.md). Keep .memlog.md, addendum.md, and review files in the same slug folder.",
+]

@@ -1,0 +1,11 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+spine_output_path = "{planning_artifacts}"
+run_folder_pattern = "{slug}"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Write the primary deliverable as {slug}-architecture.md inside {planning_artifacts}/{slug}/. Resolve slug before binding doc_workspace.",
+]

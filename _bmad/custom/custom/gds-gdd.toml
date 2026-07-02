@@ -1,0 +1,11 @@
+# Team override — slug-folder artifact layout.
+# See _bmad/custom/artifact-layout.md
+
+[workflow]
+output_dir = "{planning_artifacts}"
+output_folder_name = "{slug}"
+
+persistent_facts = [
+  "file:{project-root}/_bmad/custom/artifact-layout.md",
+  "Write {slug}-gdd.md and {slug}-epics.md in {planning_artifacts}/{slug}/ (not gdd.md / epics.md at generic paths).",
+]
