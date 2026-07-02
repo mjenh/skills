@@ -5,6 +5,13 @@ All notable changes to [github.com/mjenh/skills/weather](https://github.com/mjen
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.1](https://github.com/mjenh/skills/releases/tag/weather/v1.0.1) - 2026-07-02
+
+### Added
+
+- Add LICENSE.md
+
+
 ## [1.0.0](https://github.com/mjenh/skills/releases/tag/weather/v1.0.0) - 2026-07-02
 
 ### Added
@@ -21,12 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `cmd/weather` CLI for manual lookups
 - Co-located agent/MCP integration docs in `skill/SKILL.md` and `skill/tool.schema.json`
 - `.env.example` documenting `WEATHER_API_KEY` and optional `LOG_LEVEL`
-
-## [1.0.0](https://github.com/mjenh/skills/releases/tag/weather/v1.0.1) - 2026-07-02
-
-### Added
-
-- Add LICENSE.md
 
 
 ### Requirements

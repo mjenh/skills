@@ -1,0 +1,26 @@
+name: Changelog Check
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch and tags
+        run: |
+          git fetch origin "${{ github.base_ref }}" --tags
+
+      - name: Validate module changelogs
+        run: |
+          chmod +x .github/scripts/check-changelog.sh
+          .github/scripts/check-changelog.sh "origin/${{ github.base_ref }}"

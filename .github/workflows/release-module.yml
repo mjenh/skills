@@ -1,0 +1,32 @@
+name: Release Module
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch tags
+        run: git fetch origin --tags
+
+      - name: Create tags and GitHub releases
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x .github/scripts/release-module.sh
+          .github/scripts/release-module.sh "${{ github.event.before }}" "${{ github.sha }}"
