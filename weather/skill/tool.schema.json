@@ -1,0 +1,32 @@
+{
+  "name": "get_weather",
+  "description": "Get current weather conditions for a location including temperature, conditions, and humidity.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string",
+        "description": "City, address, or place name to look up."
+      }
+    },
+    "required": ["location"]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "location": {
+        "type": "string"
+      },
+      "temperatureCelsius": {
+        "type": "number"
+      },
+      "description": {
+        "type": "string"
+      },
+      "humidity": {
+        "type": ["integer", "null"]
+      }
+    },
+    "required": ["location", "temperatureCelsius", "description"]
+  }
+}

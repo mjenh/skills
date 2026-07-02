@@ -1,0 +1,17 @@
+# Environment and secrets
+.env
+.env.local
+
+# Go build artifacts
+/weather
+/bin/
+*.exe
+*.test
+*.out
+coverage.out
+coverage.html
+
+# IDE and OS
+.idea/
+.vscode/
+.DS_Store
